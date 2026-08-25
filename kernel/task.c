@@ -5,9 +5,10 @@
 // Gerência básica de tarefas.
 
 #include <stdlib.h>
+#include <valgrind/valgrind.h>
 #include "task.h"
 
-#define INI_STACK_SIZE 10000
+#define STACKSIZE 10000
 struct task_t task_kernel;
 struct task_t *task_atual;
 int ID;
@@ -33,18 +34,22 @@ struct task_t *task_create(char *name, void (*entry)(void *), void *arg) {
     task->id = ID;
     ID++;
     task->parent = task_atual;
-    void *stack = calloc(INI_STACK_SIZE, sizeof(void));
-    if(ctx_create(&(task->context), entry, arg, stack, INI_STACK_SIZE) == ERROR)
+    void *stack = calloc(STACKSIZE, sizeof(void));
+    if(ctx_create(&(task->context), entry, arg, stack, STACKSIZE) == ERROR)
         return NULL;
+    task->stack = stack;
+    task->vg_id = VALGRIND_STACK_REGISTER(task->stack, task->stack + STACKSIZE);
+    
     return task;
 }
 
 int task_destroy(struct task_t *task) {
     //if(task->status != TERMINATED)
     //    return ERROR;
-    free(task->context.stack);
+    free(task->stack);
     free(task);
     return NOERROR;
+    VALGRIND_STACK_DEREGISTER(task->vg_id);
 }
 
 int task_id(struct task_t *task) {

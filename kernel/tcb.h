@@ -23,6 +23,8 @@ struct task_t
     enum status_t status;     // pronta, executando, ...
     //...             // demais informações, a completar
     struct task_t *parent;
+    void *stack;
+    int vg_id;
 };
 
 int task_switch(struct task_t *task);

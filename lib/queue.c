@@ -38,6 +38,7 @@ int queue_destroy(struct queue_t *queue) {
         node = node->next;
         free(del);
     }
+    free(queue);
     return NOERROR;
 }
 struct node_t *node_create(void *item) {
