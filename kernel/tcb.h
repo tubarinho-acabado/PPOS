@@ -20,6 +20,7 @@
 #define __PPOS_TCB__
 
 #include "ctx.h"
+#include "lib/queue.h"
 
 // Task Control Block (TCB), infos sobre uma tarefa
 
@@ -27,14 +28,15 @@ enum status_t {NEW, READY, RUNNING, SUSPENDED, TERMINATED};
 
 struct task_t
 {
-    int id;         // identificador da tarefa
-    char *name;     // nome da tarefa
+    int id;                // identificador da tarefa
+    char *name;            // nome da tarefa
     struct ctx_t context;  // contexto da tarefa
-    enum status_t status;     // pronta, executando, ...
-    //...             // demais informações, a completar
-    struct task_t *parent;
-    void *stack;
-    int vg_id;
+    enum status_t status;  // pronta, executando, ...
+    //...                  // demais informações, a completar
+    void *stack;           // pilha da task
+    struct task_t *parent; // task que criou esta task
+    struct queue_t *queue; // fila onde ela esta, ou NULL
+    int vg_id;		       // ID da pilha da tarefa no Valgrind
 };
 
 int task_switch(struct task_t *task);

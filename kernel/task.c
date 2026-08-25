@@ -16,11 +16,14 @@
 
 #include <stdlib.h>
 #include <valgrind/valgrind.h>
+
+#include "lib/queue.h"
 #include "task.h"
 
 #define STACKSIZE 10000
 struct task_t task_kernel;
 struct task_t *task_atual;
+struct queue_t *ready_queue;
 int ID;
 
 void task_init()
@@ -47,9 +50,15 @@ struct task_t *task_create(char *name, void (*entry)(void *), void *arg) {
     void *stack = calloc(STACKSIZE, sizeof(void));
     if(ctx_create(&(task->context), entry, arg, stack, STACKSIZE) == ERROR)
         return NULL;
+
     task->stack = stack;
+
+    // registra a pilha da tarefa no Valgrind
     task->vg_id = VALGRIND_STACK_REGISTER(task->stack, task->stack + STACKSIZE);
-    
+
+    task->status = READY;
+    queue_add(ready_queue, task);
+    task->queue = ready_queue;
     return task;
 }
 
@@ -57,6 +66,10 @@ int task_destroy(struct task_t *task) {
     //if(task->status != TERMINATED)
     //    return ERROR;
     free(task->stack);
+
+    // dezfaz o registro da pilha no Valgrind
+    VALGRIND_STACK_DEREGISTER(task->vg_id);
+
     free(task);
     return NOERROR;
     VALGRIND_STACK_DEREGISTER(task->vg_id);
@@ -83,4 +96,16 @@ int task_switch(struct task_t *task) {
     if(ctx_switch(cont, &(task->context)) == ERROR)
         return ERROR;
     return NOERROR;
+}
+
+void task_yield() {
+    task_atual->status = READY;
+    queue_add(ready_queue, task_atual);
+    task_atual->queue = ready_queue;
+    task_switch(&task_kernel);
+}
+
+void task_exit(int exit_code) {
+    task_atual->status = TERMINATED;
+    task_switch(&task_kernel);
 }
