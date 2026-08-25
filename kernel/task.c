@@ -4,6 +4,16 @@
 
 // Gerência básica de tarefas.
 
+/* 
++------------------------------------+
+| Nome: Gustavo de Oliveira Ferreira |
+| GRR:  20232327                     |
+|                                    |
+| Nome: Luka Monteiro                |
+| GRR:  20232356                     |
++------------------------------------+
+*/
+
 #include <stdlib.h>
 #include <valgrind/valgrind.h>
 #include "task.h"
