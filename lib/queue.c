@@ -5,6 +5,10 @@
 // Este arquivo PODE/DEVE ser alterado.
 
 // Implementação do TAD fila genérica
+
+// GRR20232327 Gustavo de Oliveira Ferreira
+// GRR20232356 Luka Monteiro
+
 #include <stdlib.h>
 #include <stdio.h>
 #include "queue.h"
