@@ -20,7 +20,6 @@
 #include "lib/queue.h"
 #include "task.h"
 
-#define STACKSIZE 10000
 struct task_t task_kernel;
 struct task_t *task_atual;
 struct queue_t *ready_queue;
@@ -43,10 +42,6 @@ struct task_t *task_create(char *name, void (*entry)(void *), void *arg) {
     struct task_t *task = malloc(sizeof(struct task_t));
     if(task == NULL) return NULL;
 
-    task->name = name;
-    task->id = ID;
-    ID++;
-    task->parent = task_atual;
     void *stack = calloc(STACKSIZE, sizeof(void));
     if(ctx_create(&(task->context), entry, arg, stack, STACKSIZE) == ERROR)
         return NULL;
@@ -56,9 +51,20 @@ struct task_t *task_create(char *name, void (*entry)(void *), void *arg) {
     // registra a pilha da tarefa no Valgrind
     task->vg_id = VALGRIND_STACK_REGISTER(task->stack, task->stack + STACKSIZE);
 
+    // ajustando os valores iniciais
+    task->name = name;
+    task->id = ID;
+    ID++;
+    task->parent = task_atual;
     task->status = READY;
+
+    // prate das filas
     queue_add(ready_queue, task);
     task->queue = ready_queue;
+
+    //parte da prioridade
+    task->prio = INI_PRIO;
+    task->dim_prio = INI_PRIO;
     return task;
 }
 

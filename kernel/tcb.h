@@ -24,6 +24,9 @@
 
 // Task Control Block (TCB), infos sobre uma tarefa
 
+#define INI_PRIO 0
+#define STACKSIZE 10000
+
 enum status_t {NEW, READY, RUNNING, SUSPENDED, TERMINATED};
 
 struct task_t
@@ -37,6 +40,9 @@ struct task_t
     struct task_t *parent; // task que criou esta task
     struct queue_t *queue; // fila onde ela esta, ou NULL
     int vg_id;		       // ID da pilha da tarefa no Valgrind
+
+    int prio;              // prioridade estatica
+    int dim_prio;          // prioridade dinamica
 };
 
 int task_switch(struct task_t *task);
