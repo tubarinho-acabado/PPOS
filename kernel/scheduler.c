@@ -4,6 +4,9 @@
 
 // Escalonador de tarefas prontas.
 
+// GRR20232327 Gustavo de Oliveira Ferreira
+// GRR20232356 Luka Monteiro
+
 #include "task.h"
 #include "scheduler.h"
 extern struct task_t *task_atual;

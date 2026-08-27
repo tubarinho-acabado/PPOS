@@ -6,15 +6,8 @@
 
 // Descritor de tarefas (TCB - Task Control Block).
 
-/* 
-+------------------------------------+
-| Nome: Gustavo de Oliveira Ferreira |
-| GRR:  20232327                     |
-|                                    |
-| Nome: Luka Monteiro                |
-| GRR:  20232356                     |
-+------------------------------------+
-*/
+// GRR20232327 Gustavo de Oliveira Ferreira
+// GRR20232356 Luka Monteiro
 
 #ifndef __PPOS_TCB__
 #define __PPOS_TCB__

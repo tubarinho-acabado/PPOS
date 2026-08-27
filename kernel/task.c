@@ -4,15 +4,8 @@
 
 // Gerência básica de tarefas.
 
-/* 
-+------------------------------------+
-| Nome: Gustavo de Oliveira Ferreira |
-| GRR:  20232327                     |
-|                                    |
-| Nome: Luka Monteiro                |
-| GRR:  20232356                     |
-+------------------------------------+
-*/
+// GRR20232327 Gustavo de Oliveira Ferreira
+// GRR20232356 Luka Monteiro
 
 #include <stdlib.h>
 #include <valgrind/valgrind.h>
