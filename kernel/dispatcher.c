@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include "scheduler.h"
 #include "task.h"
+#include "time.h"
 #include "dispatcher.h"
 extern void user_main(void *arg);
 extern struct queue_t *ready_queue;
@@ -43,6 +44,7 @@ void dispatcher()
         if(proxima != NULL) {
             
             // transfere controle para a próxima tarefa
+            proxima->quantum = QUANTUM;
             task_run(proxima);
 
             // ao voltar ao dispatcher, trata a tarefa de acordo com seu estado

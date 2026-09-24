@@ -11,6 +11,7 @@
 #include <valgrind/valgrind.h>
 
 #include "lib/queue.h"
+#include "time.h"
 #include "task.h"
 
 struct task_t task_kernel;
@@ -22,6 +23,7 @@ void task_init()
 {
     task_kernel.id = 0;
     task_kernel.name = "kernel";
+    task_kernel.task_user = 0;
     task_kernel.parent = &task_kernel;
     task_atual = &task_kernel;
     ID = 1;
@@ -29,6 +31,7 @@ void task_init()
 
 void task_term()
 {
+    task_exit(NOERROR);
 }
 
 struct task_t *task_create(char *name, void (*entry)(void *), void *arg) {
@@ -50,6 +53,7 @@ struct task_t *task_create(char *name, void (*entry)(void *), void *arg) {
     ID++;
     task->parent = task_atual;
     task->status = READY;
+    task->task_user = 1;
 
     // prate das filas
     queue_add(ready_queue, task);
@@ -58,6 +62,9 @@ struct task_t *task_create(char *name, void (*entry)(void *), void *arg) {
     //parte da prioridade
     task->prio = INI_PRIO;
     task->dim_prio = INI_PRIO;
+    task->birth_time = time();
+    task->cpu_time = 0;
+    task->cpu_acts = 0;
     return task;
 }
 
@@ -92,6 +99,8 @@ int task_switch(struct task_t *task) {
 
     struct ctx_t *cont = &(task_atual->context);
     task_atual = task;
+    task->cpu_acts++;
+    task->last_cpu_init = time();
     if(ctx_switch(cont, &(task->context)) == ERROR)
         return ERROR;
     return NOERROR;
@@ -101,10 +110,25 @@ void task_yield() {
     task_atual->status = READY;
     queue_add(ready_queue, task_atual);
     task_atual->queue = ready_queue;
+    task_atual->cpu_time += time() - task_atual->last_cpu_init;
     task_switch(&task_kernel);
+}
+
+void print_task_contab(struct task_t *task) {
+    unsigned fim = time();
+
+    printk("PPOS: task %d (%s), %d ms run, %d ms cpu, %d acts, exit code %d\n",
+           task->id,
+           task->name,
+           fim - task->birth_time,
+           task->cpu_time + fim - task->last_cpu_init,
+           task->cpu_acts,
+           task->exit_code);
 }
 
 void task_exit(int exit_code) {
     task_atual->status = TERMINATED;
+    task_atual->exit_code = exit_code;
+    print_task_contab(task_atual);
     task_switch(&task_kernel);
 }
