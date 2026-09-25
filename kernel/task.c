@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <valgrind/valgrind.h>
 
+#include "lib/pplibc.h"
 #include "lib/queue.h"
 #include "time.h"
 #include "task.h"
