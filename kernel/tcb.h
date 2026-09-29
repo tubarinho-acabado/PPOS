@@ -45,6 +45,8 @@ struct task_t
     unsigned int cpu_time;        // quantidade total de tempo que esteve na cpu
     unsigned int last_cpu_init;   // ultimo time quando ganhou a cpu
     int cpu_acts;                 // quantas vezes recebeu a cpu
+
+    struct queue_t *waiting;      // tarefas esperando por esta tarefa acabar;
 };
 
 int task_switch(struct task_t *task);

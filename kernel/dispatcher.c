@@ -15,15 +15,24 @@
 extern void user_main(void *arg);
 extern struct queue_t *ready_queue;
 extern struct task_t *task_atual;
+extern struct task_t task_kernel;
+struct queue_t *terminated_queue;
 
 void dispatcher_init()
 {
     ready_queue = queue_create();
+    terminated_queue = queue_create();
 }
 
 void dispatcher_term()
 {
     queue_destroy(ready_queue);
+    // queue_head(terminated_queue);
+    // while(!queue_item(terminated_queue)) {
+    //     task_destroy((struct task_t *) queue_item(terminated_queue));
+    //     queue_next(terminated_queue);
+    // }
+    queue_destroy(terminated_queue);
 }
 
 void dispatcher()
@@ -52,8 +61,8 @@ void dispatcher()
             switch (proxima->status) {
             case TERMINATED:
                 queue_del(ready_queue, proxima);
-                proxima->queue = NULL;
-                task_destroy(proxima);
+                queue_add(terminated_queue, proxima);
+                proxima->queue = terminated_queue;
                 break;
             default:
                 break;
@@ -79,6 +88,7 @@ void task_suspend(struct queue_t *queue) {
     if(queue != NULL) 
         queue_add(queue, (void *) task_atual);
     task_atual->queue = queue;
+    task_switch(&task_kernel);
 }
 
 void task_awake(struct task_t *task) {

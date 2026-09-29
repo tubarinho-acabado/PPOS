@@ -15,6 +15,9 @@
 #include "time.h"
 #include "task.h"
 
+extern void task_suspend(struct queue_t *queue);
+extern void task_awake(struct task_t *task);
+
 struct task_t task_kernel;
 struct task_t *task_atual;
 struct queue_t *ready_queue;
@@ -66,6 +69,8 @@ struct task_t *task_create(char *name, void (*entry)(void *), void *arg) {
     task->birth_time = time();
     task->cpu_time = 0;
     task->cpu_acts = 0;
+
+    task->waiting = queue_create();
     return task;
 }
 
@@ -73,13 +78,13 @@ int task_destroy(struct task_t *task) {
     //if(task->status != TERMINATED)
     //    return ERROR;
     free(task->stack);
+    queue_destroy(task->waiting);
 
     // dezfaz o registro da pilha no Valgrind
     VALGRIND_STACK_DEREGISTER(task->vg_id);
 
     free(task);
     return NOERROR;
-    VALGRIND_STACK_DEREGISTER(task->vg_id);
 }
 
 int task_id(struct task_t *task) {
@@ -130,6 +135,18 @@ void print_task_contab(struct task_t *task) {
 void task_exit(int exit_code) {
     task_atual->status = TERMINATED;
     task_atual->exit_code = exit_code;
+    queue_head(task_atual->waiting);
+    while(queue_item(task_atual->waiting) != NULL) {
+        task_awake(queue_item(task_atual->waiting));
+        queue_next(task_atual->waiting);
+    }
     print_task_contab(task_atual);
     task_switch(&task_kernel);
+}
+
+int task_wait(struct task_t *task) {
+    if(task->status == TERMINATED)
+        return task->exit_code;
+    task_suspend(task->waiting);
+    return task->exit_code;
 }
