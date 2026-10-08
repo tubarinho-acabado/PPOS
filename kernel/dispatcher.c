@@ -8,11 +8,13 @@
 // GRR20232356 Luka Monteiro
 
 #include <stdlib.h>
+#include <stdio.h>
 #include "scheduler.h"
 #include "task.h"
 #include "time.h"
 #include "dispatcher.h"
 extern void user_main(void *arg);
+extern struct queue_t *sleeping_queue;
 extern struct queue_t *ready_queue;
 extern struct task_t *task_atual;
 extern struct task_t task_kernel;
@@ -21,18 +23,34 @@ struct queue_t *terminated_queue;
 void dispatcher_init()
 {
     ready_queue = queue_create();
+    sleeping_queue = queue_create();
     terminated_queue = queue_create();
 }
 
 void dispatcher_term()
 {
     queue_destroy(ready_queue);
+    queue_destroy(sleeping_queue);
     // queue_head(terminated_queue);
     // while(!queue_item(terminated_queue)) {
     //     task_destroy((struct task_t *) queue_item(terminated_queue));
     //     queue_next(terminated_queue);
     // }
     queue_destroy(terminated_queue);
+}
+
+void alarm_clock() {
+    unsigned int agora = time();
+    struct task_t *item = (struct task_t *) queue_head(sleeping_queue);
+    while(item != NULL) {
+        // printf("..\n");
+        // printf("acorda: %d\n", item->wake_me_up);
+        // printf("agora: %d\n", agora);
+        // printf("..\n");
+        if(item->wake_me_up <= agora)
+            task_awake(item);
+        item = queue_next(sleeping_queue);
+    }
 }
 
 void dispatcher()
@@ -44,10 +62,15 @@ void dispatcher()
     task_run(task_user);
     
     // enquanto houver tarefas de usuário
-    while(queue_size(ready_queue) > 0) {
+    while(queue_size(ready_queue) > 0 || queue_size(sleeping_queue) > 0) {
         
+        // acorda tarefas adormecidas, se já dormiram o suficiente
+        alarm_clock();
+
         // escolhe a próxima tarefa a executar
         struct task_t *proxima = scheduler(ready_queue);
+
+        alarm_clock();
         
         // escalonador escolheu uma tarefa?
         if(proxima != NULL) {
@@ -68,6 +91,8 @@ void dispatcher()
                 break;
             }
         }
+        // hw_wfi();
+        //fprintf(stderr, "%d %d\n", queue_size(ready_queue), queue_size(sleeping_queue));
     }
 
     // destrói a tarefa inicial do usuário
@@ -82,12 +107,14 @@ void task_run(struct task_t *task) {
 }
 
 void task_suspend(struct queue_t *queue) {
+    task_atual->task_user = 0;
     queue_del(ready_queue, (void *) task_atual);
     task_atual->queue = NULL;
-    task_atual->status = SUSPENDED;
     if(queue != NULL) 
         queue_add(queue, (void *) task_atual);
     task_atual->queue = queue;
+    task_atual->status = SUSPENDED;
+    task_atual->task_user = 1;
     task_switch(&task_kernel);
 }
 

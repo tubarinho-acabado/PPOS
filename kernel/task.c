@@ -21,6 +21,8 @@ extern void task_awake(struct task_t *task);
 struct task_t task_kernel;
 struct task_t *task_atual;
 struct queue_t *ready_queue;
+struct queue_t *sleeping_queue;
+
 int ID;
 
 void task_init()
@@ -149,4 +151,9 @@ int task_wait(struct task_t *task) {
         return task->exit_code;
     task_suspend(task->waiting);
     return task->exit_code;
+}
+
+void task_sleep(int t) {
+    task_atual->wake_me_up = time() + ((unsigned int) t);
+    task_suspend(sleeping_queue);
 }

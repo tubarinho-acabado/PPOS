@@ -46,7 +46,9 @@ struct task_t
     unsigned int last_cpu_init;   // ultimo time quando ganhou a cpu
     int cpu_acts;                 // quantas vezes recebeu a cpu
 
-    struct queue_t *waiting;      // tarefas esperando por esta tarefa acabar;
+    struct queue_t *waiting;      // tarefas esperando por esta tarefa acabar
+
+    unsigned int wake_me_up;      // se estiver dormindo, deve ser acordada nesse tempo
 };
 
 int task_switch(struct task_t *task);
