@@ -45,7 +45,7 @@ void spin_unlock(int *lock) {
 }
 
 int sem_create(int value) {
-    struct semaphore_t *sem = malloc(sizeof(struct semaphore_t *));
+    struct semaphore_t *sem = malloc(sizeof(struct semaphore_t));
     sem->counter = value;
     sem->lock = 0;
     sem->tasks_queue = queue_create();
