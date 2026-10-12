@@ -33,6 +33,7 @@ void task_init()
     task_kernel.parent = &task_kernel;
     task_atual = &task_kernel;
     ID = 1;
+    task_kernel.last_cpu_init = time();
 }
 
 void task_term()
@@ -109,6 +110,7 @@ int task_switch(struct task_t *task) {
     task_atual = task;
     task->cpu_acts++;
     task->last_cpu_init = time();
+    task_atual->cpu_time += time() - task_atual->last_cpu_init;
     if(ctx_switch(cont, &(task->context)) == ERROR)
         return ERROR;
     return NOERROR;
@@ -118,7 +120,6 @@ void task_yield() {
     task_atual->status = READY;
     queue_add(ready_queue, task_atual);
     task_atual->queue = ready_queue;
-    task_atual->cpu_time += time() - task_atual->last_cpu_init;
     task_switch(&task_kernel);
 }
 
