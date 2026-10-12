@@ -4,6 +4,9 @@
 
 // Semáforos e spinlocks
 
+// GRR20232327 Gustavo de Oliveira Ferreira
+// GRR20232356 Luka Monteiro
+
 #include <stdlib.h>
 #include "task.h"
 #include "dispatcher.h"
