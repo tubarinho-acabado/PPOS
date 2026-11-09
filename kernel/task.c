@@ -24,6 +24,7 @@ struct queue_t *ready_queue;
 struct queue_t *sleeping_queue;
 
 int ID;
+int user_tasks_vivas;
 
 void task_init()
 {
@@ -34,6 +35,7 @@ void task_init()
     task_atual = &task_kernel;
     ID = 1;
     task_kernel.last_cpu_init = time();
+    user_tasks_vivas = 0;
 }
 
 void task_term()
@@ -74,6 +76,7 @@ struct task_t *task_create(char *name, void (*entry)(void *), void *arg) {
     task->cpu_acts = 0;
 
     task->waiting = queue_create();
+    user_tasks_vivas++;
     return task;
 }
 
@@ -141,9 +144,10 @@ void task_exit(int exit_code) {
     queue_head(task_atual->waiting);
     while(queue_item(task_atual->waiting) != NULL) {
         task_awake(queue_item(task_atual->waiting));
-        queue_next(task_atual->waiting);
+        queue_del(task_atual->waiting, queue_item(task_atual->waiting));
     }
     print_task_contab(task_atual);
+    user_tasks_vivas--;
     task_switch(&task_kernel);
 }
 

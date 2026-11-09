@@ -18,6 +18,7 @@ extern struct queue_t *sleeping_queue;
 extern struct queue_t *ready_queue;
 extern struct task_t *task_atual;
 extern struct task_t task_kernel;
+extern int ID;
 struct queue_t *terminated_queue;
 
 void dispatcher_init()
@@ -43,14 +44,15 @@ void alarm_clock() {
     unsigned int agora = time();
     struct task_t *item = (struct task_t *) queue_head(sleeping_queue);
     while(item != NULL) {
-        // printf("..\n");
-        // printf("acorda: %d\n", item->wake_me_up);
-        // printf("agora: %d\n", agora);
-        // printf("..\n");
         if(item->wake_me_up <= agora)
             task_awake(item);
         item = queue_next(sleeping_queue);
     }
+}
+
+int user_tasks() {
+    extern int user_tasks_vivas;
+    return user_tasks_vivas;
 }
 
 void dispatcher()
@@ -59,11 +61,11 @@ void dispatcher()
     
     // cria a tarefa inicial de usuário, que executará user_main()
     struct task_t *task_user = task_create("user_main", user_main, arg);
+    task_user->quantum = QUANTUM;
     task_run(task_user);
     
     // enquanto houver tarefas de usuário
-    while(queue_size(ready_queue) > 0 || queue_size(sleeping_queue) > 0) {
-        
+    while(user_tasks() > 0) {
         // acorda tarefas adormecidas, se já dormiram o suficiente
         alarm_clock();
 
@@ -94,7 +96,6 @@ void dispatcher()
         // hw_wfi();
         //fprintf(stderr, "%d %d\n", queue_size(ready_queue), queue_size(sleeping_queue));
     }
-
     // destrói a tarefa inicial do usuário
     task_destroy(task_user);
 }
