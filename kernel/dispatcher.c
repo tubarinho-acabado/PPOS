@@ -32,11 +32,6 @@ void dispatcher_term()
 {
     queue_destroy(ready_queue);
     queue_destroy(sleeping_queue);
-    // queue_head(terminated_queue);
-    // while(!queue_item(terminated_queue)) {
-    //     task_destroy((struct task_t *) queue_item(terminated_queue));
-    //     queue_next(terminated_queue);
-    // }
     queue_destroy(terminated_queue);
 }
 
@@ -93,8 +88,6 @@ void dispatcher()
                 break;
             }
         }
-        // hw_wfi();
-        //fprintf(stderr, "%d %d\n", queue_size(ready_queue), queue_size(sleeping_queue));
     }
     // destrói a tarefa inicial do usuário
     task_destroy(task_user);

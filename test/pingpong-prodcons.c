@@ -20,7 +20,6 @@ unsigned int sono() {
 }
 
 void body_produtor(void *arg) {
-    //printk("começou prod\n");
     unsigned int parada = time() + SEGUNDOS * 1000;
     while(cont_cons > 0 && parada > time()) {
         task_sleep(sono());

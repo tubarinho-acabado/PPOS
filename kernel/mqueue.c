@@ -4,6 +4,9 @@
 
 // Gerência de filas de mensagens
 
+// GRR20232327 Gustavo de Oliveira Ferreira
+// GRR20232356 Luka Monteiro
+
 #include <string.h>
 #include "lib/pplibc.h"
 #include "syscall.h"

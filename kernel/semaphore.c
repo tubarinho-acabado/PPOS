@@ -42,7 +42,7 @@ void sem_term()
     int *item = queue_head(locks_zumbi);
     while(item != NULL) {
         queue_del(locks_zumbi, item);
-        //free(item);
+        free(item);
         item = queue_item(locks_zumbi);
     }
     queue_destroy(locks_zumbi);
